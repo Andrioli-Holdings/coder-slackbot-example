@@ -1,0 +1,10 @@
+slackbot
+coder-slackbot-example
+
+# Environment / secrets
+.env.sh
+.env
+.env.*
+
+# OS junk
+.DS_Store
