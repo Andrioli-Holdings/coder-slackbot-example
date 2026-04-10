@@ -1,6 +1,6 @@
 # Coder Slackbot Example
 
-A minimal Go Slackbot that uses the [Coder chat API](https://coder.com/docs)'s **dynamic tools** feature to let an LLM interact with Slack. Powered by Coder.
+This is a **minimal example** of a Go Slackbot that uses the [Coder chat API](https://coder.com/docs)'s **dynamic tools** feature to let an LLM interact with Slack. It is intended as a starting point — fork it, customize the system prompt, and add your own tools.
 
 ## How It Works
 
@@ -44,5 +44,5 @@ go build -o slackbot .
 
 ## Requirements
 
-- A Coder deployment with agents and chat enabled
+- **Coder**: commit [`76d89f59af42`](https://github.com/coder/coder/commit/76d89f59af42) or later (the first commit with the `WatchChats`, `UnsafeDynamicTools`, and experimental chat APIs this example depends on)
 - Go 1.24+
