@@ -29,10 +29,23 @@ export SLACK_BOT_TOKEN="xoxb-..."        # Bot User OAuth Token
 export SLACK_APP_TOKEN="xapp-..."        # App-Level Token (socket mode)
 export CODER_URL="https://your-coder.example.com"
 export CODER_SESSION_TOKEN="..."         # coder tokens create
+export CODER_ORGANIZATION_ID="..."       # uuid of the Coder org (curl $CODER_URL/api/organizations)
 
 go build -o slackbot .
 ./slackbot
 ```
+
+## Running as a systemd service (Ubuntu)
+
+`scripts/install-andribot.sh` builds the binary, writes `/etc/systemd/system/andribot.service`, and starts it. Provide secrets either in `/etc/andribot.env` (export the five vars above) or as positional arguments:
+
+```bash
+sudo ./scripts/install-andribot.sh                                  # uses /etc/andribot.env
+sudo ./scripts/install-andribot.sh xoxb-... xapp-... https://... tok-... org-uuid
+sudo journalctl -u andribot -f                                       # tail logs
+```
+
+The script is idempotent — re-run it on every deploy.
 
 ## Slack App Setup
 

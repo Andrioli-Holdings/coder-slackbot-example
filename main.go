@@ -239,6 +239,7 @@ type bot struct {
 	logger    *slog.Logger
 	slack     *slack.Client
 	coder     *codersdk.ExperimentalClient
+	orgID     uuid.UUID
 	botUID    string
 	tools     []codersdk.DynamicTool
 	toolMap   map[string]codersdk.DynamicTool
@@ -314,6 +315,12 @@ func main() {
 	base := codersdk.New(u)
 	base.SetSessionToken(mustEnv("CODER_SESSION_TOKEN"))
 
+	orgID, err := uuid.Parse(mustEnv("CODER_ORGANIZATION_ID"))
+	if err != nil {
+		logger.Error("invalid CODER_ORGANIZATION_ID", "error", err)
+		os.Exit(1)
+	}
+
 	api := slack.New(mustEnv("SLACK_BOT_TOKEN"), slack.OptionAppLevelToken(mustEnv("SLACK_APP_TOKEN")))
 	sm := socketmode.New(api, socketmode.OptionDebug(false))
 
@@ -328,6 +335,7 @@ func main() {
 		logger:    logger,
 		slack:     api,
 		coder:     codersdk.NewExperimentalClient(base),
+		orgID:     orgID,
 		botUID:    auth.UserID,
 		userCache: newUserCache(5 * time.Minute),
 	}
@@ -420,6 +428,7 @@ func (b *bot) handleMention(ctx context.Context, ev *slackevents.AppMentionEvent
 		}
 	} else {
 		chat, err := b.coder.CreateChat(ctx, codersdk.CreateChatRequest{
+			OrganizationID:     b.orgID,
 			Content:            parts,
 			Labels:             map[string]string{"slack_thread": key},
 			SystemPrompt:       systemPrompt,
@@ -593,7 +602,7 @@ func (b *bot) watchChats(ctx context.Context) {
 			case codersdk.ChatWatchEventKindStatusChange:
 				logger.Info("status_change", "status", event.Chat.Status)
 				switch event.Chat.Status {
-				case codersdk.ChatStatusCompleted, codersdk.ChatStatusError:
+				case codersdk.ChatStatusError, codersdk.ChatStatusRequiresAction:
 					b.setStatus(ctx, channel, threadTs, "")
 				}
 			}
